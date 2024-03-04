@@ -11,10 +11,10 @@ the schedulers depending on the result of the ownership
 check.
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index f380a518bc444bfdfbbedf38805c7684e53a5629..c54d5f254a4e7055470a4868187de3a18c21d0e5 100644
+index ca27559cf4aa1c2e44fdca2022e213b1b1c80f4e..3fae7b21353d18ff1e8005fbbe83be783de8a953 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -2709,6 +2709,14 @@ public final class Bukkit {
+@@ -2857,6 +2857,14 @@ public final class Bukkit {
          return server.isOwnedByCurrentRegion(entity);
      }
      // Paper end - Folia region threading API
@@ -30,10 +30,10 @@ index f380a518bc444bfdfbbedf38805c7684e53a5629..c54d5f254a4e7055470a4868187de3a1
      @NotNull
      public static Server.Spigot spigot() {
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index 68206cf0178c26c0f528a1e14a5fb4e9ad410369..f77553fc70bc1f3f18af50e53c0041bbaaebab9a 100644
+index b4f8281d3797ec825a7671f38077cd65d5a1d76e..fe3d89c2c319c4f4b2b3e4a121d6626a898f501b 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -2364,4 +2364,10 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+@@ -2497,4 +2497,10 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
       */
      boolean isOwnedByCurrentRegion(@NotNull Entity entity);
      // Paper end - Folia region threading API

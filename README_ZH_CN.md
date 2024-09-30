@@ -26,37 +26,23 @@ Folia将附近加载的区块分组，形成一个“独立区域”
 比如王国或者城镇，空岛类和多人生存类服务器
 
 ### Folia在什么硬件上运行得最好?
-Folia对主频需求不是很高。
-最好16个核心以上（注意是核心，不是线程）
-像EPYC或者志强系列都可以很好的运行上百人的服务器
+Folia对主频需求不是很高。最好16个核心以上（注意是核心，不是线程） 像EPYC或者志强系列都可以很好的运行上百人的服务器
 
 ### 如何最好地配置Folia?
 建议预先生成世界，这样所需的区块系统工作的线程数量会大大减少。
 
-以下是基于第一次EOYC测试的粗略估计
-在Folia在测试服务器上发布之前
-只有330名玩家，所以他并不准确
+以下是基于第一次EOYC测试的粗略估计在Folia在测试服务器上发布之前只有330名玩家，所以他并不准确
 
-第二次基于7950x3d测试结果
-500人整体的可以稳定在TPS19以上
-大多数区域可以稳定在20
+第二次基于7950x3d测试结果500人整体的可以稳定在TPS19以上大多数区域可以稳定在20
 
-The total number of cores on the machine available should be 
-taken into account. Then, allocate threads for: 
-- netty IO :~4 per 200-300 players
-- chunk system io threads: ~3 per 200-300 players
-- chunk system workers if pre-generated, ~2 per 200-300 players
-- There is no best guess for chunk system workers if not pre-generated, as
-  on the test server we ran we gave 16 threads but chunk generation was still
-  slow at ~300 players.
-- GC Settings: ???? But, GC settings _do_ allocate concurrent threads, and you need
-  to know exactly how many. This is typically through the `-XX:ConcGCThreads=n` flag. Do not
-  confuse this flag with `-XX:ParallelGCThreads=n`, as parallel GC threads only run when
-  the application is paused by GC and as such should not be taken into account.
-
-After all of that allocation, the remaining cores on the system until 80%
-allocation (total threads allocated < 80% of cpus available) can be
-allocated to tickthreads (under global config, threaded-regions.threads). 
+应考虑机器上可用的物理核心总数（非超线程），然后为以下对象分配线程：
+-网络IO：每4个线程约200-300名玩家
+-区块系统IO：每3个线程约200-300名玩家
+-区块系统IO工人预先生成:每2个线程200-300名玩家
+如果不是预先生成的，那么区块系统工作就没有很好的预测，因为在我们运行300人的测试服务器上，分配了16个线程，但区块生成仍然很慢。
+-GC设置：？？？？但是，GC设置_do_分配并发线程，您需要确切知道有多少个。这通常是通过`-XX:ConcGCThreads=n`标志实现的。
+不要将此标志与“-XX:AParallelGCThreads=n”混淆，因为并行GC线程仅在GC暂停应用程序时运行，因此不应被考虑在内。
+在所有这些全部分配完成之后，服务端的分配资源应该不超过系统的80%（分配的线程总数<可用cpu的80%），可以分配给tickthreads（在全局配置下，threaded regions.threads）。
 
 The reason you should not allocate more than 80% of the cores is due to the
 fact that plugins or even the server may make use of additional threads 

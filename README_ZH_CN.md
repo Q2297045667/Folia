@@ -6,7 +6,8 @@
 
 ## 概述
 
-Folia将附近加载的区块分组，形成一个“独立区域”。请参阅[PaperMC文档](https://docs.papermc.io/folia/reference/region-logic)了解Folia将如何对附近的块进行分组的确切细节。
+Folia将附近加载的区块分组，形成一个“独立区域”。请参阅[PaperMC文档](https://docs.papermc.io/folia/reference/region-logic)了解Folia将如何对附近的区块进行分组的详细细节。
+
 每个独立区域都有自己的tick循环，在常规的Minecraft（20TPS）中tick。
 
 tick循环在线程池上并行执行。
@@ -63,78 +64,54 @@ PS：以上的测试环境为玩家分散到每个区块分组的测试结果
 [folia-plugins](https://github.com/BlockhostOfficial/folia-plugins)
 [modrinth](https://modrinth.com/plugins?g=categories:%27folia%27&g=categories:folia)
 
-## API plans
+## API计划
 
-Currently, there is a lot of API that relies on the main thread. 
-I expect basically zero plugins that are compatible with Paper to 
-be compatible with Folia. However, there are plans to add API that 
-would allow Folia plugins to be compatible with Paper.
+目前，有很多API依赖于主线程。
 
-For example, the Bukkit Scheduler. The Bukkit Scheduler inherently
-relies on a single main thread. Folia's RegionScheduler and Folia's
-EntityScheduler allow scheduling of tasks to the "next tick" of whatever
-region "owns" either a location or an entity. These could be implemented
-on regular Paper, except they schedule to the main thread - in both cases,
-the execution of the task will occur on the thread that "owns" the
-location or entity. This concept applies in general, as the current Paper
-(single threaded) can be viewed as one giant "region" that encompasses
-all chunks in all worlds. 
+我希望基本上没有与Paper兼容的插件与Folia兼容，有计划添加API，允许Folia插件与Paper兼容。
 
-It is not yet decided whether to add this API to Paper itself directly
-or to Paperlib.
+例如，Bukkit调度器。
 
-### The new rules
+Bukkit Scheduler固有地依赖于单个主线程。Folia的RegionScheduler和Folia的EntityScheduler允许将任务调度到“拥有”位置或实体的任何区域的"next tick"。
 
-First, Folia breaks many plugins. To aid users in figuring out which
-plugins work, only plugins that have been explicitly marked by the
-author(s) to work with Folia will be loaded. By placing
-"folia-supported: true" into the plugin's plugin.yml, plugin authors
-can mark their plugin as compatible with regionised multithreading.
+这些可以在常规的Paper上实现，除非它们调度到主线程 在这两种情况下，任务的执行都将发生在“拥有”位置或实体的线程上。
 
-The other important rule is that the regions tick in _parallel_, and not 
-_concurrently_. They do not share data, they do not expect to share data,
-and sharing of data _will_ cause data corruption. 
-Code that is running in one region under no circumstance can 
-be accessing or modifying data that is in another region. Just 
-because multithreading is in the name, it doesn't mean that everything 
-is now thread-safe. In fact, there are only a _few_ things that were 
-made thread-safe to make this happen. As time goes on, the number 
-of thread context checks will only grow, even _if_ it comes at a 
-performance penalty - _nobody_ is going to use or develop for a 
-server platform that is buggy as hell, and the only way to 
-prevent and find these bugs is to make bad accesses fail _hard_ at the 
-source of the bad access.
+这一概念普遍适用，因为当前的Paper（单线程）可以被视为一个包含所有世界中所有块的巨大“区域”。
 
-This means that Folia compatible plugins need to take advantage of 
-API like the RegionScheduler and the EntityScheduler to ensure 
-their code is running on the correct thread context.
+目前尚未决定是否将此API直接添加到Paper本身或发送到Paperlib。
 
-In general, it is safe to assume that a region owns chunk data
-in an approximate 8 chunks from the source of an event (i.e. player
-breaks block, can probably access 8 chunks around that block). But,
-this is not guaranteed - plugins should take advantage of upcoming
-thread-check API to ensure correct behavior.
+### 新规则
 
-The only guarantee of thread-safety comes from the fact that a
-single region owns data in certain chunks - and if that region is
-ticking, then it has full access to that data. This data is 
-specifically entity/chunk/poi data, and is entirely unrelated
-to **ANY** plugin data.
+首先，Folia破坏了许多插件API。
 
-Normal multithreading rules apply to data that plugins store/access
-their own data or another plugin's - events/commands/etc. are called 
-in _parallel_ because regions are ticking in _parallel_ (we CANNOT 
-call them in a synchronous fashion, as this opens up deadlock issues 
-and would handicap performance). There are no easy ways out of this, 
-it depends solely on what data is being accessed. Sometimes a 
-concurrent collection (like ConcurrentHashMap) is enough, and often a 
-concurrent collection used carelessly will only _hide_ threading 
-issues, which then become near impossible to debug.
+为了帮助用户了解哪些插件有效，只加载作者明确标记过为与Folia兼容的插件。
 
-### Current API additions
+通过将“folia-supported:true”放入插件的plugin.yml中，插件作者可以将他们的插件标记为与Folia兼容。
 
-To properly understand API additions, please read
-[Project overview](https://docs.papermc.io/folia/reference/overview).
+另一个重要规则是，区域在_paralle_中tick，而不是_concurrently_。
+而且他们不共享数据，也不希望共享数据，共享数据会导致数据损坏和线程占用的情况。
+在任何情况下，在一个区域中运行的代码都不能访问或修改另一个区域的数据。
+仅仅因为多线程在名称中，但是这并不意味着一切线程操作都是安全的。
+事实上，只有一个新的东西是线程安全的，才能实现这一点。
+随着时间的推移，线程上下文检查的数量只会增加，即使它会带来性能损失——_nobody将使用或开发一个有漏洞的服务器平台，而预防和发现这些漏洞的唯一方法是在错误访问的源头使错误访问失败。
+
+这意味着与Folia兼容的插件需要利用像RegionScheduler和EntityScheduler这样的API，以确保它们的代码在正确的线程上下文上运行。
+
+一般来说，可以安全地假设一个区域拥有来自事件源的大约8个块中的块数据（即玩家打破块，可能可以访问该块周围的8个块）。
+
+但是，这并不能保证——插件应该利用即将推出的线程检查API来确保正确的行为。
+
+线程安全的唯一保证来自这样一个事实，即单个区域拥有某些区块中的数据，
+如果该区域正在运行，那么它就可以完全访问这些数据。
+此数据具体是实体/区块/poi数据，与**任何**插件数据完全无关。
+
+正常的多线程规则适用于插件存储/访问自己的数据或另一个插件的数据的事件/命令等在_paralle_中调用，因为区域在_paralel_中tick（我们不能以同步方式调用它们，因为这会导致线程死锁并会影响性能）。
+没有简单的方法可以解决这个问题，这完全取决于正在访问的数据。
+有时并发集合（如ConcurrentHashMap）就足够了，而且经常不小心使用并发集合只会发现线程问题，这几乎不可能调试的。
+
+### API当前新增内容
+
+要正确理解API添加内容，请阅读[Project overview](https://docs.papermc.io/folia/reference/overview).
 
 - RegionScheduler, AsyncScheduler, GlobalRegionScheduler, and EntityScheduler 
   acting as a replacement for  the BukkitScheduler.
@@ -143,7 +120,7 @@ To properly understand API additions, please read
 - Bukkit#isOwnedByCurrentRegion to test if the current ticking region
   owns positions/entities
 
-### Thread contexts for API
+### API的线程上下文
 
 To properly understand API additions, please read
 [Project overview](https://docs.papermc.io/folia/reference/overview).
@@ -161,7 +138,7 @@ called on the region owning entity. Events involving actions on an entity
 fired from regions or the global region are considered _synchronous_, 
 even though there is no main thread anymore. 
 
-### Current broken API
+### 当前中断的API
 
 - Most API that interacts with portals / respawning players / some
   player login API is broken.
@@ -172,7 +149,7 @@ even though there is no main thread anymore.
   use teleportAsync
 - Could be more
 
-### Planned API additions
+### 计划新增API
 
 - Proper asynchronous events. This would allow the result of an event
   to be completed later, on a different thread context. This is required
@@ -181,14 +158,14 @@ even though there is no main thread anymore.
 - World loading/unloading
 - More to come here
 
-### Planned API changes
+### API计划变更
 
 - Super aggressive thread checks across the board. This is absolutely
   required to prevent plugin devs from shipping code that may randomly
   break random parts of the server in entirely _undiagnosable_ manners.
 - More to come here
 
-### Maven information
+### Maven信息
 * Maven Repo (for folia-api):
 ```xml
 <repository>
@@ -207,7 +184,7 @@ even though there is no main thread anymore.
  ```
 
 
-## License
+## 许可证
 The PATCHES-LICENSE file describes the license for api & server patches,
 found in `./patches` and its subdirectories except when noted otherwise.
 

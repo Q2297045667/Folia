@@ -6,7 +6,7 @@
 
 ## 概述
 
-Folia将附近加载的块分组，形成一个“独立区域”。请参阅[PaperMC文档](https://docs.papermc.io/folia/reference/region-logic)了解Folia将如何对附近的块进行分组的确切细节。
+Folia将附近加载的区块分组，形成一个“独立区域”。请参阅[PaperMC文档](https://docs.papermc.io/folia/reference/region-logic)了解Folia将如何对附近的块进行分组的确切细节。
 每个独立区域都有自己的tick循环，在常规的Minecraft（20TPS）中tick。
 
 tick循环在线程池上并行执行。

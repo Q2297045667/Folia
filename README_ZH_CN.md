@@ -80,7 +80,7 @@ Bukkit Scheduler固有地依赖于单个主线程。Folia的RegionScheduler和Fo
 
 目前尚未决定是否将此API直接添加到Paper本身或发送到Paperlib。
 
-### 新规则
+### 新的规则
 
 首先，Folia破坏了许多插件API。
 
@@ -109,7 +109,7 @@ Bukkit Scheduler固有地依赖于单个主线程。Folia的RegionScheduler和Fo
 没有简单的方法可以解决这个问题，这完全取决于正在访问的数据。
 有时并发集合（如ConcurrentHashMap）就足够了，而且经常不小心使用并发集合只会发现线程问题，这几乎不可能调试的。
 
-### API当前新增内容
+### API当前新增的内容
 
 要正确理解API添加内容，请阅读[Project overview](https://docs.papermc.io/folia/reference/overview).
 
@@ -138,7 +138,7 @@ called on the region owning entity. Events involving actions on an entity
 fired from regions or the global region are considered _synchronous_, 
 even though there is no main thread anymore. 
 
-### 当前中断的API
+### 当前中断/遗弃的API
 
 - Most API that interacts with portals / respawning players / some
   player login API is broken.
@@ -149,7 +149,7 @@ even though there is no main thread anymore.
   use teleportAsync
 - Could be more
 
-### 计划新增API
+### 计划新增的API
 
 - Proper asynchronous events. This would allow the result of an event
   to be completed later, on a different thread context. This is required

@@ -5,10 +5,10 @@ Subject: [PATCH] Add TPS From Region
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 8ab94f8189ebd9d4158231871abdebec399deb2c..733a532dc2b3103471a9695034979c80b1db4acd 100644
+index 8ab94f8189ebd9d4158231871abdebec399deb2c..5571430fd1b9cae2b4e5d634f6d5560792aeeeb8 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -2429,6 +2429,28 @@ public final class Bukkit {
+@@ -2429,6 +2429,30 @@ public final class Bukkit {
      }
      // Paper end
  
@@ -19,7 +19,8 @@ index 8ab94f8189ebd9d4158231871abdebec399deb2c..733a532dc2b3103471a9695034979c80
 +     * @param location the location for which to get the TPS
 +     * @return current location TPS (5s, 15s, 1m, 5m, 15m in Folia-Server), or null if the region doesn't exist
 +     */
-+    public double @Nullable [] getTPS(Location location) {
++    @Nullable
++    public static double[] getTPS(@NotNull Location location) {
 +        return server.getTPS(location);
 +    }
 +
@@ -29,7 +30,8 @@ index 8ab94f8189ebd9d4158231871abdebec399deb2c..733a532dc2b3103471a9695034979c80
 +     * @param chunk the chunk for which to get the TPS
 +     * @return current chunk TPS (5s, 15s, 1m, 5m, 15m in Folia-Server), or null if the region doesn't exist
 +     */
-+    public double @Nullable [] getTPS(Chunk chunk){
++    @Nullable
++    public static double[] getTPS(@NotNull Chunk chunk){
 +        return server.getTPS(chunk);
 +    }
 +    // Folia end
@@ -38,10 +40,10 @@ index 8ab94f8189ebd9d4158231871abdebec399deb2c..733a532dc2b3103471a9695034979c80
       * Get the advancement specified by this key.
       *
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index ad816538b30079c62d5e1eb98c6f4b61e12e8d47..ee53473d062f32dcc7c00a6cf4516df2a3e79161 100644
+index ad816538b30079c62d5e1eb98c6f4b61e12e8d47..d52f642aadea9ec19a769f43d995f9c6fa0934fb 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -2076,6 +2076,24 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+@@ -2076,6 +2076,26 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
      double getAverageTickTime();
      // Paper end
  
@@ -52,7 +54,8 @@ index ad816538b30079c62d5e1eb98c6f4b61e12e8d47..ee53473d062f32dcc7c00a6cf4516df2
 +     * @param location the location for which to get the TPS
 +     * @return current location TPS (5s, 15s, 1m, 5m, 15m in Folia-Server), or null if the region doesn't exist
 +     */
-+    public double @Nullable [] getTPS(Location location);
++    @Nullable
++    public double[] getTPS(@NotNull Location location);
 +
 +    /**
 +     * Gets the current chunk TPS.
@@ -60,7 +63,8 @@ index ad816538b30079c62d5e1eb98c6f4b61e12e8d47..ee53473d062f32dcc7c00a6cf4516df2
 +     * @param chunk the chunk for which to get the TPS
 +     * @return current chunk TPS (5s, 15s, 1m, 5m, 15m in Folia-Server), or null if the region doesn't exist
 +     */
-+    public double @Nullable [] getTPS(Chunk chunk);
++    @Nullable
++    public double[] getTPS(@NotNull Chunk chunk);
 +    // Folia end
 +
      // Paper start
